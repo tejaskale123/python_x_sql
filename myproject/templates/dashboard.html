@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<div class="container dashboard">
+    <h2>Welcome to Dashboard</h2>
+
+    <div class="user-profile">
+        <div class="profile-icon">
+            <span>{{ user.username|first|upper }}</span>
+        </div>
+        <div class="profile-info">
+            <h3>{{ user.username }}</h3>
+            <p>{{ user.email }}</p>
+        </div>
+    </div>
+
+    <div class="dashboard-actions">
+        <a href="/users/" class="btn primary">View All Users</a>
+        <a href="/register/" class="btn secondary">Add New User</a>
+        <a href="/logout/" class="logout-btn">Logout</a>
+        <a href="/profile/" class="btn">Profile</a>
+        <a href="/change-password/" class="btn">Change Password</a>
+    </div>
+</div>
+</body>
+</html>
