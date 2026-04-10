@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - MyProject{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="card-body p-4 p-lg-5">
+                <div class="mb-4 text-center text-lg-start">
+                    <h1 class="fw-bold text-primary mb-2">Welcome to Dashboard</h1>
+                    <p class="text-muted mb-0">Here's your project overview</p>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-md-4">
+                        <div class="card border-0 shadow-sm h-100 profile-card">
+                            <div class="card-body text-center">
+                                <div class="avatar-circle mb-3 mx-auto">
+                                    <span class="fs-1 text-primary">{{ user.username|first|upper }}</span>
+                                </div>
+                                <h5 class="card-title fw-bold">{{ user.username }}</h5>
+                                <p class="card-text text-muted mb-0">
+                                    <i class="bi bi-envelope"></i> {{ user.email }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h6 class="card-title fw-semibold text-muted mb-3">
+                                    <i class="bi bi-speedometer2"></i> Dashboard Stats
+                                </h6>
+                                <div class="mb-3">
+                                    <p class="mb-1 small text-muted">Account Status</p>
+                                    <span class="badge bg-success rounded-pill">Active</span>
+                                </div>
+                                <div class="mb-3">
+                                    <p class="mb-1 small text-muted">Member Since</p>
+                                    <span class="fw-semibold">2026</span>
+                                </div>
+                                <hr>
+                                <a href="/users/" class="text-primary text-decoration-none small fw-semibold">
+                                    View all users <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h6 class="card-title fw-semibold text-muted mb-3">
+                                    <i class="bi bi-lightning"></i> Quick Actions
+                                </h6>
+                                <div class="d-grid gap-2">
+                                    <a href="/profile/" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-person-circle"></i> My Profile
+                                    </a>
+                                    <a href="/change-password/" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-key"></i> Change Password
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom">
+                        <h6 class="card-title mb-0 fw-semibold">
+                            <i class="bi bi-gear"></i> Dashboard Actions
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-2">
+                            <div class="col-12 col-sm-6 col-lg-3">
+                                <a href="/users/" class="btn btn-primary w-100 py-2">
+                                    <i class="bi bi-people"></i> View All Users
+                                </a>
+                            </div>
+                            <div class="col-12 col-sm-6 col-lg-3">
+                                <a href="/register/" class="btn btn-success w-100 py-2">
+                                    <i class="bi bi-person-plus"></i> Add New User
+                                </a>
+                            </div>
+                            <div class="col-12 col-sm-6 col-lg-3">
+                                <a href="/profile/" class="btn btn-info w-100 py-2">
+                                    <i class="bi bi-person-circle"></i> View Profile
+                                </a>
+                            </div>
+                            <div class="col-12 col-sm-6 col-lg-3">
+                                <a href="/logout/" class="btn btn-danger w-100 py-2">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

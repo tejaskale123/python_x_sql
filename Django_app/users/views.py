@@ -5,8 +5,10 @@ from django.contrib.auth.models import User
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import UserSerializer
-from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
+
 # ================= REGISTER =================
 def register(request):
     if request.method == "POST":
@@ -70,6 +72,9 @@ def logout_view(request):
 
 # ================= USERS LIST =================
 def users_list(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
     try:
         users = User.objects.filter(is_superuser=False).order_by('username')
     except Exception as e:
@@ -77,8 +82,6 @@ def users_list(request):
         users = []
 
     return render(request, "users.html", {"users": users})
-
-
 # ================= DELETE USER =================
 def delete_user(request, id):
     try:
@@ -159,6 +162,7 @@ def change_password(request):
     
 # ================= GET ALL USERS =================
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def api_users(request):
     users = User.objects.all()
     serializer = UserSerializer(users, many=True)

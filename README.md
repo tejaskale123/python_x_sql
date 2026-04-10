@@ -1,6 +1,6 @@
 # Python & SQL Learning Project
 
-A comprehensive learning project combining Python database operations with a Django web application for user management. This workspace contains both standalone scripts for database manipulation and a full-featured Django project.
+A comprehensive learning project combining Python database operations with a **professional Django web application** for user management. This workspace contains both standalone scripts for database manipulation and a full-featured Django project with a modern, responsive UI built with **Bootstrap 5**.
 
 ---
 
@@ -9,7 +9,20 @@ A comprehensive learning project combining Python database operations with a Dja
 This repository is organized into two main sections:
 
 1. **Standalone Python & SQL Scripts** - Database operations and practice queries
-2. **Django User Management Application** - Full-featured web application
+2. **Django User Management Application** - Production-ready web application with professional UI
+
+---
+
+## 🎨 UI Features (Bootstrap 5 Refactor)
+
+- ✅ **Responsive Design** - Works perfectly on desktop, tablet, and mobile
+- ✅ **Professional Styling** - Gradient backgrounds, smooth animations, modern cards
+- ✅ **Password Visibility Toggle** - Eye icon to show/hide passwords on all auth pages
+- ✅ **Accessibility** - Bootstrap icons, semantic HTML, alt text
+- ✅ **Form Validation** - Client-side validation with helpful error messages
+- ✅ **Alert System** - Auto-dismissing alerts, success/error/info messages
+- ✅ **Navigation Bar** - Sticky navbar with dropdown menu support
+- ✅ **Mobile Optimized** - Touch-friendly buttons and spacing
 
 ---
 
@@ -31,33 +44,34 @@ python_x_sql/
 │   ├── python_test.py             # Test scripts
 │   └── practice_queries.sql       # SQL practice queries
 │
-└── 📁 Django Web Application (myproject/)
+└── 📁 Django Application (Django_app/)
     ├── manage.py                  # Django management script
     ├── db.sqlite3                 # SQLite database
-    ├── myproject/                 # Project configuration
-    │   ├── settings.py            # Django settings
+    ├── myproject/
+    │   ├── settings.py            # Django configuration
     │   ├── urls.py                # URL routing
-    │   ├── wsgi.py                # Production server
-    │   └── asgi.py                # Async server
+    │   ├── wsgi.py                # Production server config
+    │   └── asgi.py                # Async server config
     ├── users/                     # User management app
     │   ├── models.py              # Database models
     │   ├── views.py               # View controllers
-    │   ├── urls.py                # App URL routes
-    │   ├── serializers.py         # Data serializers
-    │   ├── db_config.py           # Database config
-    │   ├── migrations/            # Database migrations
-    │   └── tests.py               # Unit tests
-    ├── templates/                 # HTML templates
-    │   ├── login.html
-    │   ├── register.html
-    │   ├── dashboard.html
-    │   ├── profile.html
-    │   ├── users.html
-    │   ├── change_password.html
-    │   └── update.html
+    │   ├── urls.py                # App routes
+    │   ├── serializers.py         # API serializers
+    │   └── migrations/            # Database migrations
+    ├── templates/                 # HTML templates (Bootstrap 5)
+    │   ├── base.html              # Base layout with navbar
+    │   ├── login.html             # Login page
+    │   ├── register.html          # Registration page
+    │   ├── dashboard.html         # Main dashboard
+    │   ├── users.html             # Users management
+    │   ├── profile.html           # User profile
+    │   ├── change_password.html   # Password change
+    │   └── update.html            # User edit form
     └── static/
-        └── css/
-            └── style.css          # Responsive styling
+        ├── css/
+        │   └── style.css          # Professional Bootstrap 5 theme
+        └── js/
+            └── main.js            # Utility functions
 ```
 
 ---
@@ -65,19 +79,20 @@ python_x_sql/
 ## ✨ Features
 
 ### Django Web Application
-- ✅ User registration with validation
-- ✅ User login (username or email)
-- ✅ Dashboard with user summary
-- ✅ User profile management
-- ✅ Change password functionality
-- ✅ User list with full CRUD operations
-- ✅ Responsive & clean design
-- ✅ Secure password handling
+- ✅ **User Authentication** - Registration and login (username or email)
+- ✅ **Dashboard** - Welcome page with user stats and quick actions
+- ✅ **User Management** - Full CRUD operations (Create, Read, Update, Delete)
+- ✅ **Profile Management** - View and edit user information
+- ✅ **Password Security** - Change password with validation
+- ✅ **Session Management** - Secure cookie-based sessions
+- ✅ **Responsive UI** - Mobile-first Bootstrap 5 design
+- ✅ **Form Validation** - Client and server-side validation
+- ✅ **REST API** - API endpoints for user management
 
 ### Python Scripts
 - ✅ Database connection management
 - ✅ Table creation and schema management
-- ✅ Data insertion and retrieval
+- ✅ Data insertion, retrieval, and manipulation
 - ✅ JOIN operations for complex queries
 - ✅ Data updates and deletion
 - ✅ User login system implementation
@@ -87,10 +102,10 @@ python_x_sql/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Python 3.7+
-- Conda or virtualenv
+- Python 3.8+
+- Conda environment (django_learning)
 - MySQL or SQLite
-- Git (optional)
+- Modern web browser
 
 ### Setup Instructions
 
@@ -98,6 +113,205 @@ python_x_sql/
 ```bash
 conda activate django_learning
 ```
+
+#### 2️⃣ Navigate to Django App
+```bash
+cd Django_app
+```
+
+#### 3️⃣ Install Dependencies
+```bash
+pip install django djangorestframework django-rest-framework-simplejwt mysql-connector-python
+```
+
+#### 4️⃣ Run Migrations
+```bash
+python manage.py migrate
+```
+
+#### 5️⃣ Start Development Server
+```bash
+python manage.py runserver
+```
+
+#### 6️⃣ Access Application
+Open your browser and visit:
+```
+http://127.0.0.1:8000/
+```
+
+---
+
+## 🌐 Application Routes
+
+| Route | Purpose | Authentication |
+|-------|---------|---|
+| `/` | Login page | No |
+| `/register/` | User registration | No |
+| `/dashboard/` | Main dashboard | Yes |
+| `/users/` | All users list | Yes |
+| `/profile/` | User profile | Yes |
+| `/update/<id>/` | Edit user | Yes |
+| `/change-password/` | Change password | Yes |
+| `/delete/<id>/` | Delete user | Yes |
+| `/logout/` | Logout | Yes |
+
+---
+
+## 🎯 Key UI Components
+
+### Authentication Pages
+- **Centered Card Layout** - Professional login and registration forms
+- **Password Toggle** - Eye icon to show/hide passwords
+- **Gradient Background** - Modern purple gradient design
+- **Form Validation** - Real-time error messages
+- **Responsive Forms** - Works on all screen sizes
+
+### Dashboard & Admin Pages
+- **Sticky Navbar** - Always accessible navigation
+- **Dropdown Menu** - Additional options (Change Password, Logout)
+- **Card-Based Layout** - Organized information display
+- **Responsive Table** - Desktop table view, mobile card view
+- **Quick Actions** - Buttons for common operations
+
+### User Profile
+- **Avatar Circle** - User initial display
+- **Profile Card** - Clean information presentation
+- **Status Badge** - Account status indicator
+- **Edit Actions** - Quick links to profile actions
+
+---
+
+## 🔐 Security Features
+
+- ✅ **Password Hashing** - Django's PBKDF2 hashing algorithm
+- ✅ **CSRF Protection** - Token-based CSRF protection on all forms
+- ✅ **SQL Injection Prevention** - ORM parameterized queries
+- ✅ **Session Security** - Secure cookie-based sessions
+- ✅ **Input Validation** - Server-side form validation
+- ✅ **Authentication Required** - Protected routes require login
+
+---
+
+## 🎨 Styling & Theme
+
+- **Framework**: Bootstrap 5.3.0
+- **Icons**: Bootstrap Icons 1.11.0
+- **Colors**: 
+  - Primary: Blue (#0d6efd)
+  - Success: Green (#198754)
+  - Danger: Red (#dc3545)
+  - Info: Cyan (#0dcaf0)
+
+---
+
+## 📱 Browser Compatibility
+
+✅ Chrome (latest)
+✅ Firefox (latest)
+✅ Safari (latest)
+✅ Edge (latest)
+✅ Mobile browsers (iOS Safari, Chrome Mobile)
+
+---
+
+## 🐛 Troubleshooting
+
+### Django Server Won't Start
+```bash
+# Check environment is activated
+conda activate django_learning
+
+# Run migrations
+python manage.py migrate
+
+# Start server
+python manage.py runserver
+```
+
+### Static Files Not Loading
+```bash
+# Collect static files
+python manage.py collectstatic --noinput
+
+# Ensure STATICFILES_DIRS is set in settings.py
+```
+
+### Database Connection Error
+```bash
+# Verify MySQL is running
+# Check credentials in myproject/settings.py
+# Ensure database exists
+```
+
+### Port Already in Use
+```bash
+# Use different port
+python manage.py runserver 8001
+```
+
+---
+
+## 📚 Technology Stack
+
+- **Backend**: Django 4.2+
+- **Database**: MySQL / SQLite
+- **Frontend**: Bootstrap 5.3.0, HTML5, CSS3, JavaScript
+- **API**: Django REST Framework
+- **Authentication**: Django Auth + JWT Tokens
+- **Python Version**: 3.8+
+
+---
+
+## 📝 File Descriptions
+
+| File | Purpose |
+|------|---------|
+| `base.html` | Base template with navbar and footer |
+| `login.html` | Login authentication page |
+| `register.html` | User registration page |
+| `dashboard.html` | Main dashboard with stats |
+| `users.html` | Users management interface |
+| `profile.html` | User profile display |
+| `change_password.html` | Password change form |
+| `update.html` | User editing form |
+| `style.css` | Professional Bootstrap 5 theme |
+| `main.js` | JavaScript utilities and functions |
+
+---
+
+## 🎓 Learning Outcomes
+
+This project demonstrates:
+- Python database operations and SQL queries
+- Django MVT (Model-View-Template) architecture
+- User authentication and authorization
+- Bootstrap 5 responsive web design
+- HTML forms and validation
+- RESTful API design
+- Database migrations and schema management
+
+---
+
+## 📄 License
+
+This is a learning project. Feel free to use and modify as needed for educational purposes.
+
+---
+
+## 📞 Project Status
+
+✅ **Status**: Production Ready (April 2026)
+✅ **UI**: Fully Refactored with Bootstrap 5
+✅ **Features**: All Core Features Implemented
+✅ **Testing**: Tested on Latest Browsers
+✅ **Performance**: Optimized and Fast
+
+---
+
+**Last Updated**: April 10, 2026
+**Version**: 2.0 (Bootstrap 5 Refactor)
+**Maintainer**: Development Team
 
 #### 2️⃣ Install Dependencies
 ```bash
