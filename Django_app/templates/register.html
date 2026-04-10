@@ -1,12 +1,13 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Register - MyProject{% endblock %}
 {% block body_class %}auth-page{% endblock %}
 {% block navbar %}{% endblock %}
 
 {% block content %}
-<div class="auth-container">
-    <div class="card shadow-lg border-0 rounded-3">
+<div class="auth-container slide-up">
+    <div class="card">
+        <div class="glow-effect"></div>
         <div class="card-body p-4 p-sm-5">
             <div class="text-center mb-4">
                 <div class="avatar-register mb-3">
@@ -17,12 +18,12 @@
             </div>
 
             {% if messages %}
-                {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                    <i class="bi bi-exclamation-circle"></i> {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                {% endfor %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                <i class="bi bi-exclamation-circle"></i> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
             {% endif %}
 
             {% if error %}
@@ -40,7 +41,8 @@
                         <span class="input-group-text bg-white border-end-0">
                             <i class="bi bi-person text-primary"></i>
                         </span>
-                        <input type="text" class="form-control border-start-0" id="username" name="username" placeholder="Choose a username" required>
+                        <input type="text" class="form-control border-start-0" id="username" name="name"
+                            placeholder="Choose a username" required>
                     </div>
                 </div>
 
@@ -50,7 +52,8 @@
                         <span class="input-group-text bg-white border-end-0">
                             <i class="bi bi-envelope text-primary"></i>
                         </span>
-                        <input type="email" class="form-control border-start-0" id="email" name="email" placeholder="Enter your email" required>
+                        <input type="email" class="form-control border-start-0" id="email" name="email"
+                            placeholder="Enter your email" required>
                     </div>
                 </div>
 
@@ -60,7 +63,8 @@
                         <span class="input-group-text bg-white border-end-0">
                             <i class="bi bi-lock text-primary"></i>
                         </span>
-                        <input type="password" class="form-control border-start-0" id="password" name="password" placeholder="Create a strong password" required>
+                        <input type="password" class="form-control border-start-0" id="password" name="password"
+                            placeholder="Create a strong password" required>
                         <span class="input-group-text bg-white border-start-0 toggle-password" role="button">
                             <i class="bi bi-eye-fill text-primary"></i>
                         </span>

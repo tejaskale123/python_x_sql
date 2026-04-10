@@ -2,12 +2,13 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.models import User
-from rest_framework.decorators import api_view
+from django.contrib.auth.decorators import login_required
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
 from .serializers import UserSerializer
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes
 
 # ================= REGISTER =================
 def register(request):
@@ -83,18 +84,21 @@ def users_list(request):
 
     return render(request, "users.html", {"users": users})
 # ================= DELETE USER =================
+from django.http import HttpResponse
+from django.contrib.auth.models import User
+
 def delete_user(request, id):
+    # 🔒 SAFE ROLE CHECK
+    if not hasattr(request.user, 'profile') or request.user.profile.role != "admin":
+        return HttpResponse("Access Denied ❌")
+
     try:
         user = User.objects.get(id=id)
         user.delete()
-        messages.success(request, f"User '{user.username}' deleted successfully!")
     except User.DoesNotExist:
-        messages.error(request, "User not found!")
-    except Exception as e:
-        messages.error(request, f"Error deleting user: {str(e)}")
+        return HttpResponse("User not found ❌")
 
     return redirect('users')
-
 
 # ================= UPDATE USER =================
 def update_user(request, id):
@@ -168,16 +172,28 @@ def api_users(request):
     serializer = UserSerializer(users, many=True)
     return Response(serializer.data)
 
-    # ================= CREATE USER (POST) =================
+  # ================= CREATE USER (POST) =================
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def api_create_user(request):
+
+    # 🔒 ONLY ADMIN
+    if request.user.profile.role != "admin":
+        return Response({"error": "Only admin can create users ❌"})
+
     username = request.data.get('username')
     email = request.data.get('email')
     password = request.data.get('password')
 
-    if not username or not password:
-        return Response({"error": "Username and password required"})
+    # ✅ VALIDATION
+    if not username or not email or not password:
+        return Response({"error": "All fields are required"})
 
+    # ✅ CHECK USER EXISTS
+    if User.objects.filter(username=username).exists():
+        return Response({"error": "Username already exists"})
+
+    # ✅ CREATE USER
     user = User.objects.create_user(
         username=username,
         email=email,
@@ -185,35 +201,70 @@ def api_create_user(request):
     )
 
     return Response({
-        "message": "User created",
+        "message": "User created successfully ✅",
         "id": user.id
     })
 
 
 # ================= UPDATE USER =================
 @api_view(['PUT'])
+@permission_classes([IsAuthenticated])
 def api_update_user(request, id):
+
+    # 🔒 ONLY ADMIN
+    if request.user.profile.role != "admin":
+        return Response({"error": "Access Denied ❌"})
+
     try:
         user = User.objects.get(id=id)
     except User.DoesNotExist:
         return Response({"error": "User not found"})
 
-    user.username = request.data.get('username', user.username)
-    user.email = request.data.get('email', user.email)
+    # ✅ UPDATE DATA
+    username = request.data.get('username')
+    email = request.data.get('email')
+
+    if username:
+        user.username = username
+
+    if email:
+        user.email = email
+
     user.save()
 
-    return Response({"message": "User updated"})
+    return Response({"message": "User updated successfully ✅"})
 
 
 # ================= DELETE USER =================
-@api_view(['DELETE'])
-def api_delete_user(request, id):
+
+
+def delete_user(request, id):
+    # 🔒 SAFE ROLE CHECK
+    if not hasattr(request.user, 'profile') or request.user.profile.role != "admin":
+        return HttpResponse("Access Denied ❌")
+
     try:
         user = User.objects.get(id=id)
         user.delete()
-        return Response({"message": "User deleted"})
     except User.DoesNotExist:
-        return Response({"error": "User not found"})
+        return HttpResponse("User not found ❌")
+
+    return redirect('users')
+
+# ================= DELETE USER (API) =================
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def api_delete_user(request, id):
+    # 🔒 ONLY ADMIN
+    if request.user.profile.role != "admin":
+        return Response({"error": "Access Denied ❌"})
+
+    try:
+        user = User.objects.get(id=id)
+        user.delete()
+        return Response({"message": "User deleted successfully ✅"})
+    except User.DoesNotExist:
+        return Response({"error": "User not found ❌"})
 
 # ================= LOGIN (API) =================#
 @api_view(['POST'])

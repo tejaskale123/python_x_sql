@@ -3,9 +3,10 @@
 {% block title %}Dashboard - MyProject{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
+<div class="row justify-content-center slide-up delay-1">
     <div class="col-12 col-xl-10">
-        <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="card">
+            <div class="glow-effect"></div>
             <div class="card-body p-4 p-lg-5">
                 <div class="mb-4 text-center text-lg-start">
                     <h1 class="fw-bold text-primary mb-2">Welcome to Dashboard</h1>
@@ -14,7 +15,7 @@
 
                 <div class="row g-4 mb-4">
                     <div class="col-12 col-md-4">
-                        <div class="card border-0 shadow-sm h-100 profile-card">
+                        <div class="card h-100">
                             <div class="card-body text-center">
                                 <div class="avatar-circle mb-3 mx-auto">
                                     <span class="fs-1 text-primary">{{ user.username|first|upper }}</span>
@@ -28,7 +29,7 @@
                     </div>
 
                     <div class="col-12 col-md-4">
-                        <div class="card border-0 shadow-sm h-100">
+                        <div class="card h-100">
                             <div class="card-body">
                                 <h6 class="card-title fw-semibold text-muted mb-3">
                                     <i class="bi bi-speedometer2"></i> Dashboard Stats
@@ -50,7 +51,7 @@
                     </div>
 
                     <div class="col-12 col-md-4">
-                        <div class="card border-0 shadow-sm h-100">
+                        <div class="card h-100">
                             <div class="card-body">
                                 <h6 class="card-title fw-semibold text-muted mb-3">
                                     <i class="bi bi-lightning"></i> Quick Actions
@@ -68,8 +69,8 @@
                     </div>
                 </div>
 
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white border-bottom">
+                <div class="card mt-4">
+                    <div class="card-header border-bottom">
                         <h6 class="card-title mb-0 fw-semibold">
                             <i class="bi bi-gear"></i> Dashboard Actions
                         </h6>
