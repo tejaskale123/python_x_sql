@@ -6,6 +6,7 @@ PROJECT STRUCTURE:
 --------------------------------------------------------------------------------
 
 Django_app/
+├── README.md
 ├── db.sqlite3
 ├── export_project.py
 ├── manage.py
@@ -294,15 +295,17 @@ FILE: myproject\settings.py
 
 from pathlib import Path
 from datetime import timedelta
+import os
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+load_dotenv(BASE_DIR / '.env')
+DB_ENGINE = os.getenv('DB_ENGINE', 'sqlite').lower()
 
 SECRET_KEY = 'django-insecure-tczb^mj1968=@q9cx=mxenn82!s=-mxud%p-%#1u-6v071n9dk'
 
-DEBUG = True
-
-ALLOWED_HOSTS = []
+DEBUG = os.getenv('DEBUG', 'True').strip().lower() in ('1', 'true', 'yes')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 
 # 🔥 APPS
@@ -359,21 +362,29 @@ TEMPLATES = [
 WSGI_APPLICATION = 'myproject.wsgi.application'
 
 
-# 🔥 DATABASE (सध्या ठीक आहे)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'tejas_db',
-        'USER': 'root',
-        'PASSWORD': 'Tejas@123',
-        'HOST': 'localhost',
-        'PORT': '3306',
+# 🔥 DATABASE (supports SQLite by default; enable MySQL with DB_ENGINE=mysql)
+if DB_ENGINE == 'mysql':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.getenv("DB_NAME"),
+            'USER': os.getenv("DB_USER"),
+            'PASSWORD': os.getenv("DB_PASSWORD"),
+            'HOST': os.getenv("DB_HOST") or '127.0.0.1',
+            'PORT': os.getenv("DB_PORT") or '3306',
+        }
     }
-}
-
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # 🔥 STATIC FILES (CSS setup)
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # 👇 NEW (IMPORTANT)
 STATICFILES_DIRS = [
@@ -698,13 +709,13 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.models import User
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from .serializers import UserSerializer
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes
+from django.contrib.auth.decorators import login_required
 
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from .serializers import UserSerializer
 
 # ================= REGISTER =================
 def register(request):
@@ -780,18 +791,21 @@ def users_list(request):
 
     return render(request, "users.html", {"users": users})
 # ================= DELETE USER =================
+from django.http import HttpResponse
+from django.contrib.auth.models import User
+
 def delete_user(request, id):
-    # 🔒 ROLE CHECK
-    if request.user.profile.role != "admin":
+    # 🔒 SAFE ROLE CHECK
+    if not hasattr(request.user, 'profile') or request.user.profile.role != "admin":
         return HttpResponse("Access Denied ❌")
 
-    # ✅ allowed only admin
-    from django.contrib.auth.models import User
-    user = User.objects.get(id=id)
-    user.delete()
+    try:
+        user = User.objects.get(id=id)
+        user.delete()
+    except User.DoesNotExist:
+        return HttpResponse("User not found ❌")
 
     return redirect('users')
-
 
 # ================= UPDATE USER =================
 def update_user(request, id):
@@ -929,14 +943,35 @@ def api_update_user(request, id):
 
 
 # ================= DELETE USER =================
-@api_view(['DELETE'])
-def api_delete_user(request, id):
+
+
+def delete_user(request, id):
+    # 🔒 SAFE ROLE CHECK
+    if not hasattr(request.user, 'profile') or request.user.profile.role != "admin":
+        return HttpResponse("Access Denied ❌")
+
     try:
         user = User.objects.get(id=id)
         user.delete()
-        return Response({"message": "User deleted"})
     except User.DoesNotExist:
-        return Response({"error": "User not found"})
+        return HttpResponse("User not found ❌")
+
+    return redirect('users')
+
+# ================= DELETE USER (API) =================
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def api_delete_user(request, id):
+    # 🔒 ONLY ADMIN
+    if request.user.profile.role != "admin":
+        return Response({"error": "Access Denied ❌"})
+
+    try:
+        user = User.objects.get(id=id)
+        user.delete()
+        return Response({"message": "User deleted successfully ✅"})
+    except User.DoesNotExist:
+        return Response({"error": "User not found ❌"})
 
 # ================= LOGIN (API) =================#
 @api_view(['POST'])

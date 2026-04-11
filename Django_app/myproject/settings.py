@@ -3,16 +3,14 @@ from datetime import timedelta
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
-
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+load_dotenv(BASE_DIR / '.env')
+DB_ENGINE = os.getenv('DB_ENGINE', 'sqlite').lower()
 
 SECRET_KEY = 'django-insecure-tczb^mj1968=@q9cx=mxenn82!s=-mxud%p-%#1u-6v071n9dk'
 
-DEBUG = False
-
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+DEBUG = os.getenv('DEBUG', 'True').strip().lower() in ('1', 'true', 'yes')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 
 # 🔥 APPS
@@ -69,7 +67,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'myproject.wsgi.application'
 
 
-# 🔥 DATABASE (सध्या ठीक आहे)
+# 🔥 DATABASE (supports SQLite by default; enable MySQL with DB_ENGINE=mysql)
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -82,7 +81,8 @@ DATABASES = {
 }
 
 # 🔥 STATIC FILES (CSS setup)
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # 👇 NEW (IMPORTANT)
 STATICFILES_DIRS = [

@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -26,9 +27,12 @@ def register(request):
         if User.objects.filter(email=email).exists():
             return render(request, "register.html", {"error": "Email already exists."})
 
-        User.objects.create_user(username=username, email=email, password=password)
-        messages.success(request, "Account created successfully. Please log in.")
-        return redirect('login')
+        try:
+            User.objects.create_user(username=username, email=email, password=password)
+            messages.success(request, "Account created successfully. Please log in.")
+            return redirect('login')
+        except Exception as e:
+            return render(request, "register.html", {"error": f"Error creating account: {str(e)}"})
 
     return render(request, "register.html")
 
@@ -48,6 +52,7 @@ def login_view(request):
                 user = authenticate(request, username=user_obj.username, password=password)
             except User.DoesNotExist:
                 user = None
+
         if user:
             login(request, user)
             return redirect('dashboard')
@@ -57,25 +62,21 @@ def login_view(request):
     return render(request, "login.html")
 
 
-# ================= DASHBOARD =================
-def dashboard(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-
-    return render(request, "dashboard.html", {"user": request.user})
-
-
 # ================= LOGOUT =================
 def logout_view(request):
     logout(request)
     return redirect('login')
 
 
-# ================= USERS LIST =================
-def users_list(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
+# ================= DASHBOARD =================
+@login_required(login_url='login')
+def dashboard(request):
+    return render(request, "dashboard.html", {"user": request.user})
 
+
+# ================= USERS LIST =================
+@login_required(login_url='login')
+def users_list(request):
     try:
         users = User.objects.filter(is_superuser=False).order_by('username')
     except Exception as e:
@@ -83,24 +84,29 @@ def users_list(request):
         users = []
 
     return render(request, "users.html", {"users": users})
-# ================= DELETE USER =================
-from django.http import HttpResponse
-from django.contrib.auth.models import User
 
+
+# ================= DELETE USER =================
+@login_required(login_url='login')
 def delete_user(request, id):
     # 🔒 SAFE ROLE CHECK
     if not hasattr(request.user, 'profile') or request.user.profile.role != "admin":
-        return HttpResponse("Access Denied ❌")
+        return HttpResponse("Access Denied ❌", status=403)
 
     try:
         user = User.objects.get(id=id)
         user.delete()
+        messages.success(request, "User deleted successfully!")
     except User.DoesNotExist:
-        return HttpResponse("User not found ❌")
+        messages.error(request, "User not found ❌")
+    except Exception as e:
+        messages.error(request, f"Error deleting user: {str(e)}")
 
     return redirect('users')
 
+
 # ================= UPDATE USER =================
+@login_required(login_url='login')
 def update_user(request, id):
     try:
         user = User.objects.get(id=id)
@@ -137,17 +143,15 @@ def update_user(request, id):
     return render(request, "update.html", {"user": user})
 
 
+# ================= PROFILE =================
+@login_required(login_url='login')
 def profile(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-
     return render(request, "profile.html", {"user": request.user})
 
 
+# ================= CHANGE PASSWORD =================
+@login_required(login_url='login')
 def change_password(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-
     if request.method == "POST":
         new_password = request.POST.get("password", "").strip()
 
@@ -155,31 +159,39 @@ def change_password(request):
             messages.error(request, "Password must be at least 6 characters.")
             return redirect('change_password')
 
-        user = request.user
-        user.set_password(new_password)
-        user.save()
-        update_session_auth_hash(request, user)
-        messages.success(request, "Password updated successfully.")
-        return redirect('dashboard')
+        try:
+            user = request.user
+            user.set_password(new_password)
+            user.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, "Password updated successfully.")
+            return redirect('dashboard')
+        except Exception as e:
+            messages.error(request, f"Error updating password: {str(e)}")
+            return redirect('change_password')
 
     return render(request, "change_password.html")
-    
-# ================= GET ALL USERS =================
+
+
+# ================= GET ALL USERS (API) =================
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def api_users(request):
-    users = User.objects.all()
-    serializer = UserSerializer(users, many=True)
-    return Response(serializer.data)
+    try:
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
 
-  # ================= CREATE USER (POST) =================
+
+# ================= CREATE USER (POST API) =================
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def api_create_user(request):
-
     # 🔒 ONLY ADMIN
-    if request.user.profile.role != "admin":
-        return Response({"error": "Only admin can create users ❌"})
+    if not hasattr(request.user, 'profile') or request.user.profile.role != "admin":
+        return Response({"error": "Only admin can create users ❌"}, status=403)
 
     username = request.data.get('username')
     email = request.data.get('email')
@@ -187,90 +199,89 @@ def api_create_user(request):
 
     # ✅ VALIDATION
     if not username or not email or not password:
-        return Response({"error": "All fields are required"})
+        return Response({"error": "All fields are required"}, status=400)
 
     # ✅ CHECK USER EXISTS
     if User.objects.filter(username=username).exists():
-        return Response({"error": "Username already exists"})
+        return Response({"error": "Username already exists"}, status=400)
 
-    # ✅ CREATE USER
-    user = User.objects.create_user(
-        username=username,
-        email=email,
-        password=password
-    )
+    try:
+        # ✅ CREATE USER
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password
+        )
+        return Response({
+            "message": "User created successfully ✅",
+            "id": user.id
+        }, status=201)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
 
-    return Response({
-        "message": "User created successfully ✅",
-        "id": user.id
-    })
 
-
-# ================= UPDATE USER =================
+# ================= UPDATE USER (API) =================
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def api_update_user(request, id):
-
     # 🔒 ONLY ADMIN
-    if request.user.profile.role != "admin":
-        return Response({"error": "Access Denied ❌"})
+    if not hasattr(request.user, 'profile') or request.user.profile.role != "admin":
+        return Response({"error": "Access Denied ❌"}, status=403)
 
     try:
         user = User.objects.get(id=id)
     except User.DoesNotExist:
-        return Response({"error": "User not found"})
+        return Response({"error": "User not found"}, status=404)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
 
     # ✅ UPDATE DATA
     username = request.data.get('username')
     email = request.data.get('email')
 
     if username:
+        if User.objects.filter(username=username).exclude(id=id).exists():
+            return Response({"error": "Username already exists"}, status=400)
         user.username = username
 
     if email:
+        if User.objects.filter(email=email).exclude(id=id).exists():
+            return Response({"error": "Email already exists"}, status=400)
         user.email = email
 
-    user.save()
-
-    return Response({"message": "User updated successfully ✅"})
-
-
-# ================= DELETE USER =================
-
-
-def delete_user(request, id):
-    # 🔒 SAFE ROLE CHECK
-    if not hasattr(request.user, 'profile') or request.user.profile.role != "admin":
-        return HttpResponse("Access Denied ❌")
-
     try:
-        user = User.objects.get(id=id)
-        user.delete()
-    except User.DoesNotExist:
-        return HttpResponse("User not found ❌")
+        user.save()
+        return Response({"message": "User updated successfully ✅"})
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
 
-    return redirect('users')
 
 # ================= DELETE USER (API) =================
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def api_delete_user(request, id):
     # 🔒 ONLY ADMIN
-    if request.user.profile.role != "admin":
-        return Response({"error": "Access Denied ❌"})
+    if not hasattr(request.user, 'profile') or request.user.profile.role != "admin":
+        return Response({"error": "Access Denied ❌"}, status=403)
 
     try:
         user = User.objects.get(id=id)
         user.delete()
         return Response({"message": "User deleted successfully ✅"})
     except User.DoesNotExist:
-        return Response({"error": "User not found ❌"})
+        return Response({"error": "User not found ❌"}, status=404)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
 
-# ================= LOGIN (API) =================#
+
+# ================= LOGIN (API) =================
 @api_view(['POST'])
 def api_login(request):
     username = request.data.get("username")
     password = request.data.get("password")
+
+    if not username or not password:
+        return Response({"error": "Username and password are required"}, status=400)
 
     user = authenticate(username=username, password=password)
 
@@ -280,4 +291,4 @@ def api_login(request):
             "user_id": user.id
         })
     else:
-        return Response({"error": "Invalid credentials"})
+        return Response({"error": "Invalid credentials"}, status=401)
